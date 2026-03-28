@@ -29,7 +29,7 @@ def handler(event: dict, context) -> dict:
         database=dsn.path.lstrip('/'),
         user=dsn.username,
         password=dsn.password,
-        ssl_context=True,
+        ssl_context=False,
     )
 
     if category and search:
