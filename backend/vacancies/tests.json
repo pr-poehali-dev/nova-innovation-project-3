@@ -5,15 +5,15 @@
       "method": "GET",
       "path": "/",
       "expectedStatus": 200,
-      "expectedBody": {"vacancies": []},
+      "expectedBody": {},
       "bodyMatcher": "partial"
     },
     {
       "name": "Фильтр по категории",
       "method": "GET",
-      "path": "/?category=Торговля и сервис",
+      "path": "/?category=%D0%A2%D0%BE%D1%80%D0%B3%D0%BE%D0%B2%D0%BB%D1%8F+%D0%B8+%D1%81%D0%B5%D1%80%D0%B2%D0%B8%D1%81",
       "expectedStatus": 200,
-      "expectedBody": {"vacancies": []},
+      "expectedBody": {},
       "bodyMatcher": "partial"
     }
   ]

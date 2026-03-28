@@ -1,7 +1,6 @@
 import json
 import os
-import urllib.parse
-import pg8000.native
+import psycopg2
 
 
 def handler(event: dict, context) -> dict:
@@ -22,44 +21,29 @@ def handler(event: dict, context) -> dict:
     category = params.get('category', '')
     search = params.get('search', '')
 
-    dsn = urllib.parse.urlparse(os.environ['DATABASE_URL'])
-    conn = pg8000.native.Connection(
-        host=dsn.hostname,
-        port=dsn.port or 5432,
-        database=dsn.path.lstrip('/'),
-        user=dsn.username,
-        password=dsn.password,
-        ssl_context=False,
+    conn = psycopg2.connect(os.environ['DATABASE_URL'], sslmode='disable')
+    cur = conn.cursor()
+
+    conditions = ["1=1"]
+    args = []
+
+    if category:
+        conditions.append("category = %s")
+        args.append(category)
+
+    if search:
+        conditions.append("(title ILIKE %s OR description ILIKE %s OR company ILIKE %s)")
+        like = f"%{search}%"
+        args.extend([like, like, like])
+
+    query = (
+        "SELECT id, title, category, description, company, salary, employment_type, created_at "
+        f"FROM vacancies WHERE {' AND '.join(conditions)} ORDER BY created_at DESC"
     )
 
-    if category and search:
-        like = f"%{search}%"
-        rows = conn.run(
-            "SELECT id, title, category, description, company, salary, employment_type, created_at "
-            "FROM vacancies WHERE category = :cat AND (title ILIKE :s OR description ILIKE :s OR company ILIKE :s) "
-            "ORDER BY created_at DESC",
-            cat=category, s=like
-        )
-    elif category:
-        rows = conn.run(
-            "SELECT id, title, category, description, company, salary, employment_type, created_at "
-            "FROM vacancies WHERE category = :cat ORDER BY created_at DESC",
-            cat=category
-        )
-    elif search:
-        like = f"%{search}%"
-        rows = conn.run(
-            "SELECT id, title, category, description, company, salary, employment_type, created_at "
-            "FROM vacancies WHERE title ILIKE :s OR description ILIKE :s OR company ILIKE :s "
-            "ORDER BY created_at DESC",
-            s=like
-        )
-    else:
-        rows = conn.run(
-            "SELECT id, title, category, description, company, salary, employment_type, created_at "
-            "FROM vacancies ORDER BY created_at DESC"
-        )
-
+    cur.execute(query, args)
+    rows = cur.fetchall()
+    cur.close()
     conn.close()
 
     vacancies = [

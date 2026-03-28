@@ -1,32 +1,27 @@
-import { Mail, MapPin } from "lucide-react"
+import { MapPin } from "lucide-react"
+import Icon from "@/components/ui/icon"
 import { useReveal } from "@/hooks/use-reveal"
 import { useState, type FormEvent } from "react"
 import { MagneticButton } from "@/components/magnetic-button"
 
+const VK_URL = "https://vk.ru/nehaltura_barnaul"
+
 export function ContactSection() {
   const { ref, isVisible } = useReveal(0.3)
-  const [formData, setFormData] = useState({ name: "", email: "", message: "" })
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [formData, setFormData] = useState({ name: "", phone: "", message: "" })
   const [submitSuccess, setSubmitSuccess] = useState(false)
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    if (!formData.name || !formData.phone || !formData.message) return
 
-    // Basic validation
-    if (!formData.name || !formData.email || !formData.message) {
-      return
-    }
+    const text = encodeURIComponent(
+      `Новая заявка на вакансию!\nИмя: ${formData.name}\nТелефон: ${formData.phone}\nСообщение: ${formData.message}`
+    )
+    window.open(`${VK_URL}?message=${text}`, "_blank")
 
-    setIsSubmitting(true)
-
-    // Simulate form submission (replace with actual API call later)
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-
-    setIsSubmitting(false)
     setSubmitSuccess(true)
-    setFormData({ name: "", email: "", message: "" })
-
-    // Reset success message after 5 seconds
+    setFormData({ name: "", phone: "", message: "" })
     setTimeout(() => setSubmitSuccess(false), 5000)
   }
 
@@ -53,18 +48,20 @@ export function ContactSection() {
 
             <div className="space-y-4 md:space-y-8">
               <a
-                href="mailto:info@haltura-barnaul.ru"
+                href={VK_URL}
+                target="_blank"
+                rel="noopener noreferrer"
                 className={`group block transition-all duration-700 ${
                   isVisible ? "translate-x-0 opacity-100" : "-translate-x-16 opacity-0"
                 }`}
                 style={{ transitionDelay: "200ms" }}
               >
                 <div className="mb-1 flex items-center gap-2">
-                  <Mail className="h-3 w-3 text-foreground/60" />
-                  <span className="font-mono text-xs text-foreground/60">Email</span>
+                  <Icon name="MessageCircle" size={12} className="text-foreground/60" />
+                  <span className="font-mono text-xs text-foreground/60">ВКонтакте</span>
                 </div>
                 <p className="text-base text-foreground transition-colors group-hover:text-foreground/70 md:text-2xl">
-                  info@haltura-barnaul.ru
+                  vk.ru/nehaltura_barnaul
                 </p>
               </a>
 
@@ -82,25 +79,30 @@ export function ContactSection() {
               </div>
 
               <div
-                className={`flex gap-2 pt-2 transition-all duration-700 md:pt-4 ${
+                className={`flex gap-4 pt-2 transition-all duration-700 md:pt-4 ${
                   isVisible ? "translate-x-0 opacity-100" : "-translate-x-8 opacity-0"
                 }`}
                 style={{ transitionDelay: "500ms" }}
               >
-                {["Telegram", "VK", "Авито", "2ГИС"].map((social) => (
+                {[
+                  { label: "ВКонтакте", href: VK_URL },
+                  { label: "Авито", href: "https://www.avito.ru/barnaul/vakansii" },
+                  { label: "2ГИС", href: "https://2gis.ru/barnaul" },
+                ].map((s) => (
                   <a
-                    key={social}
-                    href="#"
+                    key={s.label}
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="border-b border-transparent font-mono text-xs text-foreground/60 transition-all hover:border-foreground/60 hover:text-foreground/90"
                   >
-                    {social}
+                    {s.label}
                   </a>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Right side - Minimal form */}
           <div className="flex flex-col justify-center">
             <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
               <div
@@ -126,14 +128,14 @@ export function ContactSection() {
                 }`}
                 style={{ transitionDelay: "350ms" }}
               >
-                <label className="mb-1 block font-mono text-xs text-foreground/60 md:mb-2">Email</label>
+                <label className="mb-1 block font-mono text-xs text-foreground/60 md:mb-2">Телефон</label>
                 <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   required
                   className="w-full border-b border-foreground/30 bg-transparent py-1.5 text-sm text-foreground placeholder:text-foreground/40 focus:border-foreground/50 focus:outline-none md:py-2 md:text-base"
-                  placeholder="your@email.com"
+                  placeholder="+7 (999) 000-00-00"
                 />
               </div>
 
@@ -143,14 +145,14 @@ export function ContactSection() {
                 }`}
                 style={{ transitionDelay: "500ms" }}
               >
-                <label className="mb-1 block font-mono text-xs text-foreground/60 md:mb-2">Сообщение</label>
+                <label className="mb-1 block font-mono text-xs text-foreground/60 md:mb-2">Опишите вакансию</label>
                 <textarea
                   rows={3}
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                   required
                   className="w-full border-b border-foreground/30 bg-transparent py-1.5 text-sm text-foreground placeholder:text-foreground/40 focus:border-foreground/50 focus:outline-none md:py-2 md:text-base"
-                  placeholder="Опишите вакансию или вопрос..."
+                  placeholder="Название должности, зарплата, требования..."
                 />
               </div>
 
@@ -160,15 +162,13 @@ export function ContactSection() {
                 }`}
                 style={{ transitionDelay: "650ms" }}
               >
-                <MagneticButton
-                  variant="primary"
-                  size="lg"
-                  className="w-full disabled:opacity-50"
-                >
-                  {isSubmitting ? "Отправка..." : "Отправить"}
+                <MagneticButton variant="primary" size="lg" className="w-full">
+                  Отправить в ВКонтакте
                 </MagneticButton>
                 {submitSuccess && (
-                  <p className="mt-3 text-center font-mono text-sm text-foreground/80">Сообщение отправлено!</p>
+                  <p className="mt-3 text-center font-mono text-sm text-foreground/80">
+                    Заявка отправлена! Мы свяжемся с вами.
+                  </p>
                 )}
               </div>
             </form>
