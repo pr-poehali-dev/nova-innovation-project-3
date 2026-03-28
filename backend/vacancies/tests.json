@@ -1,0 +1,20 @@
+{
+  "tests": [
+    {
+      "name": "Все вакансии",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200,
+      "expectedBody": {"vacancies": []},
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Фильтр по категории",
+      "method": "GET",
+      "path": "/?category=Торговля и сервис",
+      "expectedStatus": 200,
+      "expectedBody": {"vacancies": []},
+      "bodyMatcher": "partial"
+    }
+  ]
+}
